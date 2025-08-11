@@ -6,11 +6,12 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 16:51:07 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 22:41:11 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:10:58 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
+#include "minishell.h"
+#include "executor.h"
 
 int	ft_strcmp(char *s1, char *s2)
 {

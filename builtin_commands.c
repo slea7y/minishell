@@ -6,13 +6,15 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 20:08:44 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 22:41:01 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:15:10 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
-#include "../../Includes/minishell.h"
-#include "../../libft/libft.h"
+#include "minishell.h"
+#include "executor.h"
+
+// • Handle $? which should expand to the exit status of the most recently
+// executed foreground pipeline.
 
 void	ft_echo(char **args)
 {

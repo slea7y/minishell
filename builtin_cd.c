@@ -6,12 +6,12 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 17:16:52 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 21:53:38 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:10:31 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
-#include "../../libft/libft.h"
+#include "minishell.h"
+#include "executor.h"
 
 char	*go_home(char *prev_pwd, t_env_list *env)
 {

@@ -6,12 +6,12 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 21:57:51 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 22:42:24 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:10:44 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
-#include "../../libft/libft.h"
+#include "minishell.h"
+#include "executor.h"
 
 void	unset_var(char **args, t_env_list *env)
 {

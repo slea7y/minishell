@@ -6,12 +6,12 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/29 20:30:21 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 18:37:14 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:10:48 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
-#include "../../Includes/minishell.h"
+#include "minishell.h"
+#include "executor.h"
 
 void	sort_env(t_env_list *env_list)
 {

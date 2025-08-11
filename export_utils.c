@@ -6,13 +6,12 @@
 /*   By: majkijew <majkijew@student.42heilbronn.de> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 18:28:25 by majkijew          #+#    #+#             */
-/*   Updated: 2025/08/08 20:51:14 by majkijew         ###   ########.fr       */
+/*   Updated: 2025/08/09 18:10:53 by majkijew         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../Includes/executor.h"
-#include "../../Includes/minishell.h"
-#include "../../libft/libft.h"
+#include "minishell.h"
+#include "executor.h"
 
 /// @brief // Valid Identifier Rules (POSIX-compatible)
 // Must start with a letter or underscore (A-Z, a-z, or _)
