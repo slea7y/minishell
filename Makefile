@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: maja <maja@student.42.fr>                  +#+  +:+       +#+         #
+#    By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
-#    Updated: 2025/09/22 00:29:56 by maja             ###   ########.fr        #
+#    Updated: 2025/09/22 20:37:27 by tdietz-r         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,6 +69,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
+	rm -f $(LIBFT)
 	$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all

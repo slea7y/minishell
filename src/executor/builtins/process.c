@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:03:59 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 00:23:33 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 18:37:35 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,10 @@ void	execute_external(char **args, char **env)
 		else if (detect_pipes(args, env))
 			exit (1);
 		else
+		{
 			execute_cmd(args, env, 0);
 			exit (1);
+		}
 		return ;
 	}
 	else
