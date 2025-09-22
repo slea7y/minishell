@@ -1,0 +1,76 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: maja <maja@student.42.fr>                  +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
+#    Updated: 2025/09/22 00:29:56 by maja             ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+NAME = minishell
+
+OBJDIR = obj
+
+
+SRC = ./main.c \
+	src/signals.c \
+	src/parser/lexer/tokanisation.c \
+	src/parser/lexer/init_env.c \
+	src/parser/lexer/checker.c \
+	src/parser/parsing/parsing.c \
+	src/executor/utils.c \
+	src/parser/lexer/handler.c \
+	src/parser/lexer/token_to_struct.c \
+	src/executor/start.c \
+	src/parser/segmentation/segmentation.c \
+	src/parser/segmentation/init.c \
+	src/parser/segmentation/segmentation_handler.c \
+	src/parser/segmentation/expansion.c \
+	src/parser/lexer/init.c \
+	src/executor/builtins/builtin_cd.c \
+	src/executor/builtins/builtin_commands.c \
+	src/executor/builtins/builtin_unset.c \
+	src/executor/builtins/export_utils.c \
+	src/executor/builtins/pipes.c \
+	src/executor/builtins/process.c \
+	src/executor/builtins/redirections.c \
+	
+OBJS = $(SRC:%.c=$(OBJDIR)/%.o)
+
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -I./includes
+LINKER = -lreadline
+
+LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
+
+all: $(NAME)
+
+$(NAME): $(LIBFT) $(OBJS)
+	@echo "Linking $(NAME)..."
+	@$(CC) $(OBJS) $(LIBFT) -o $(NAME) $(LINKER)
+	@echo "Done!"
+
+$(LIBFT):
+	@echo "Building libft..."
+	@$(MAKE) -C $(LIBFT_DIR)
+
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	@echo "Compiling $<..."
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(OBJDIR)
+	$(MAKE) -C $(LIBFT_DIR) clean
+
+fclean: clean
+	rm -f $(NAME)
+	$(MAKE) -C $(LIBFT_DIR) fclean
+
+re: fclean all
+
+.PHONY: all clean fclean re
