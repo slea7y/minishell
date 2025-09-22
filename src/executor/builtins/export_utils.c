@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 18:28:25 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 00:33:29 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:03:03 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,4 +115,47 @@ void	add_change_export(char *args, t_env_list *env)
 		change_var_value(key, value, env);
 	free(key);
 	free(value);
+}
+
+void	remove_env_var(char *key, t_env_list *env)
+{
+	t_env_node	*current;
+	t_env_node	*prev;
+
+	if (!key || !env || !env->head)
+		return ;
+
+	// Handle case where the variable to remove is the head
+	if (ft_strcmp(env->head->key, key) == 0)
+	{
+		current = env->head;
+		env->head = env->head->next;
+		if (env->tail == current)
+			env->tail = NULL;
+		free(current->key);
+		free(current->value);
+		free(current);
+		env->size--;
+		return ;
+	}
+
+	// Handle other cases
+	prev = env->head;
+	current = env->head->next;
+	while (current)
+	{
+		if (ft_strcmp(current->key, key) == 0)
+		{
+			prev->next = current->next;
+			if (env->tail == current)
+				env->tail = prev;
+			free(current->key);
+			free(current->value);
+			free(current);
+			env->size--;
+			return ;
+		}
+		prev = current;
+		current = current->next;
+	}
 }

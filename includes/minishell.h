@@ -59,7 +59,13 @@ typedef struct s_env_list
 	ssize_t		size;
 }	t_env_list;
 //Linked list - End
+
 //Structs - Start
+typedef struct s_shell_ctx
+{
+    t_env_list  *env;
+    int         last_exit_code;
+} t_shell_ctx;
 typedef enum CMD_TYPE
 {
 	BUILTIN,

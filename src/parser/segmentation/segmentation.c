@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/05 20:13:13 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/21 22:02:44 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:21:28 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void	dissect_token(t_token *token)
 
 	if (!token || !token->value)
 		return ;
-	printf("  dissect_token called for: %s\n", token->value); // debug
+	// printf("  dissect_token called for: %s\n", token->value); // debug
 	i = 0;
 	start = 0;
 	while (token->value[i])
@@ -141,28 +141,25 @@ void	assemble_final_token(t_token *token)
 /// reconstruct tokens that are split through parsing
 /// @param tokens
 /// @param env_list
-void	start_segmentation(t_token_list *tokens, t_env_list *env_list)
+void	start_segmentation(t_token_list *tokens, t_shell_ctx *ctx)
 {
 	t_token		*current_token;
 	t_segment	*current_seg;
 
-	printf("=== start_segmentation CALLED ===\n"); // debug
-	if (!tokens || !tokens->head)                  // add !env_list
+	if (!tokens || !tokens->head || !ctx)
 	{
-		printf("exit start_segmentation protection"); // debug
 		return ;
 	}
 	current_token = tokens->head;
 	while (current_token)
 	{
 		dissect_token(current_token);
-		printf("/n loop in start_segmentation\n"); // debug
 		if (current_token->segment_list)
 		{
 			current_seg = current_token->segment_list->head;
 			while (current_seg)
 			{
-				expand_variables_in_segment(current_seg, env_list);
+				expand_variables_in_segment(current_seg, ctx);
 				current_seg = current_seg->next;
 			}
 		}

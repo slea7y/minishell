@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:32:19 by maja              #+#    #+#             */
-/*   Updated: 2025/09/22 00:17:04 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:20:08 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,11 +88,12 @@ static int is_builtin(char *cmd)
             ft_strcmp(cmd, "exit") == 0);
 }
 
-static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
+static int execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
 {
     // Handle redirections for builtins
     int stdin_backup = -1;
     int stdout_backup = -1;
+    int exit_code = 0;
 
     if (cmd->files)
     {
@@ -107,7 +108,7 @@ static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
                 if (fd == -1)
                 {
                     perror("open");
-                    return;
+                    return 1;
                 }
                 dup2(fd, STDIN_FILENO);
                 close(fd);
@@ -119,7 +120,7 @@ static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
                 if (fd == -1)
                 {
                     perror("open");
-                    return;
+                    return 1;
                 }
                 dup2(fd, STDOUT_FILENO);
                 close(fd);
@@ -131,7 +132,7 @@ static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
                 if (fd == -1)
                 {
                     perror("open");
-                    return;
+                    return 1;
                 }
                 dup2(fd, STDOUT_FILENO);
                 close(fd);
@@ -140,21 +141,21 @@ static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
         }
     }
 
-    // Execute the builtin
+    // Execute the builtin and capture exit code
     if (ft_strcmp(cmd->cmd[0], "echo") == 0)
-        ft_echo(cmd->cmd);
+        exit_code = ft_echo(cmd);
     else if (ft_strcmp(cmd->cmd[0], "cd") == 0)
-        ft_cd(cmd->cmd, env_list);
+        exit_code = ft_cd(cmd, env_list);
     else if (ft_strcmp(cmd->cmd[0], "pwd") == 0)
-        ft_pwd();
+        exit_code = ft_pwd();
     else if (ft_strcmp(cmd->cmd[0], "export") == 0)
-        ft_export(cmd->cmd, env_list);
+        exit_code = ft_export(cmd, env_list);
     else if (ft_strcmp(cmd->cmd[0], "unset") == 0)
-        ft_unset(cmd->cmd, env_list);
+        exit_code = ft_unset(cmd, env_list);
     else if (ft_strcmp(cmd->cmd[0], "env") == 0)
-        ft_env(env_list);
+        exit_code = ft_env(env_list);
     else if (ft_strcmp(cmd->cmd[0], "exit") == 0)
-        ft_exit(cmd->cmd);
+        ft_exit(cmd); // exit handles its own exit
 
     // Restore original stdin/stdout if they were changed
     if (stdin_backup != -1)
@@ -167,24 +168,24 @@ static void execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
         dup2(stdout_backup, STDOUT_FILENO);
         close(stdout_backup);
     }
+
+    return exit_code;
 }
 
-static void execute_single_command(t_cmd_node *cmd, t_env_list *env_list)
+static int execute_single_command(t_cmd_node *cmd, t_env_list *env_list)
 {
     pid_t pid;
     char *cmd_path;
+    int exit_code = 0;
 
     if (is_builtin(cmd->cmd[0]))
-    {
-        execute_builtin(cmd, env_list);
-        return;
-    }
+        return execute_builtin(cmd, env_list);
 
     pid = fork();
     if (pid == -1)
     {
         perror("fork");
-        return;
+        return 1;
     }
     
     if (pid == 0)  // Child process
@@ -269,27 +270,40 @@ static void execute_single_command(t_cmd_node *cmd, t_env_list *env_list)
     {
         int status;
         waitpid(pid, &status, 0);
+        if (WIFEXITED(status))
+            exit_code = WEXITSTATUS(status);
+        else if (WIFSIGNALED(status))
+            exit_code = 128 + WTERMSIG(status);
     }
+    return exit_code;
 }
 
-void start_executor(t_cmd_list *cmds, t_env_list *env_list)
+int start_executor(t_cmd_list *cmds, t_shell_ctx *ctx)
 {
     t_cmd_node *current;
     int pipe_fd[2];
     int prev_pipe_read = -1;
+    int exit_code = 0;
 
     if (!cmds || !cmds->head)
-        return;
+        return 0;
 
     current = cmds->head;
     while (current)
     {
+        // If it's a single builtin command without pipes, execute directly
+        if (!current->next && is_builtin(current->cmd[0]))
+        {
+            exit_code = execute_single_command(current, ctx->env);
+            return exit_code;
+        }
+
         if (current->next)  // If there's a next command, we need a pipe
         {
             if (pipe(pipe_fd) == -1)
             {
-                perror("pipe");
-                return;
+            perror("pipe");
+            return 1;
             }
         }
 
@@ -297,7 +311,7 @@ void start_executor(t_cmd_list *cmds, t_env_list *env_list)
         if (pid == -1)
         {
             perror("fork");
-            return;
+            return 1;
         }
 
         if (pid == 0)  // Child process
@@ -318,8 +332,8 @@ void start_executor(t_cmd_list *cmds, t_env_list *env_list)
             }
 
             // Execute the command
-            execute_single_command(current, env_list);
-            exit(0);
+            exit_code = execute_single_command(current, ctx->env);
+            exit(exit_code);
         }
 
         // Parent process
@@ -336,6 +350,13 @@ void start_executor(t_cmd_list *cmds, t_env_list *env_list)
     }
 
     // Wait for all child processes
-    while (wait(NULL) > 0)
-        ;
+    int status;
+    while (wait(&status) > 0)
+    {
+        if (WIFEXITED(status))
+            exit_code = WEXITSTATUS(status);
+        else if (WIFSIGNALED(status))
+            exit_code = 128 + WTERMSIG(status);
+    }
+    return exit_code;
 }

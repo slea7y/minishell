@@ -9,7 +9,7 @@
 # define MAX_INPUT 1024
 # define MAX_ARGS 64
 
-void start_executor(t_cmd_list *cmds, t_env_list *env_list);
+int start_executor(t_cmd_list *cmds, t_shell_ctx *ctx);
 
 
 // typedef struct data_s
@@ -29,17 +29,18 @@ int	is_numeric(char	*str);
 void	sort_env(t_env_list *env_list);
 void	add_change_export(char *args, t_env_list *env);
 int	is_valid_identifier(char *args);
+void	remove_env_var(char *key, t_env_list *env);
 int	ft_strcmp(char *s1, char *s2);
 
 // Builtin functions
 void	sort_env(t_env_list *env_list);
-void	ft_echo(char **args);
-void	ft_pwd(void);
-void	ft_env(t_env_list *env_list);
-void	ft_cd(char **args, t_env_list *env_list);
-void	ft_exit(char **args);
-void	ft_export(char **args, t_env_list *env_list);
-void	ft_unset(char **args, t_env_list *env_list);
+int     ft_echo(t_cmd_node *cmd);
+int 	ft_pwd(void);
+int		ft_env(t_env_list *env_list);
+int		ft_cd(t_cmd_node *cmd, t_env_list *env_list);
+int		ft_exit(t_cmd_node *cmd);
+int		ft_export(t_cmd_node *cmd, t_env_list *env_list);
+int		ft_unset(t_cmd_node *cmd, t_env_list *env_list);
 
 // Env and execution helpers
 char	**dup_env(char **env);

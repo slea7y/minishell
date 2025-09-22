@@ -96,7 +96,7 @@ typedef struct s_segment_list
 //from maja ==env
 void	init_list_env(t_env_list *env_list, char **envp);
 void	free_env_list(t_env_list *env_list);
-t_cmd_list *start_parser(t_token_list *tokens, t_env_list *env_list);
+t_cmd_list *start_parser(t_token_list *tokens, t_shell_ctx *ctx);
 
 
 bool							check_builtin(t_token_list *token_list,
@@ -132,10 +132,10 @@ void							found_token(t_token_list *token_list, int start,
 									int end, t_token_type token_type);
 
 void							start_segmentation(t_token_list *tokens,
-									t_env_list *env_list);
+									t_shell_ctx *ctx);
 void							dissect_token(t_token *token);
 void							expand_variables_in_segment(t_segment *segment,
-									t_env_list *env_list);
+									t_shell_ctx *ctx);
 void							assemble_final_token(t_token *token);
 bool							handle_quoted_content(t_token *token,
 									int *index, int *start);
@@ -146,7 +146,7 @@ t_segment_list					*init_segment_list(void);
 
 char							*get_env_value(t_env_list *env_list,
 									char *var_name);
-char							*get_exit_code(void);
+char							*get_exit_code(t_shell_ctx *ctx);
 
 // int								ft_strcmp(const char *s1, const char *s2);
 

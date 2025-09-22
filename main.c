@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/21 22:43:51 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:17:26 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,9 +89,11 @@ void	free_token_list(t_token_list *tokens)
 int main(int argc, char **argv, char **envp)
 {
     char        *input;
+    t_shell_ctx ctx;
     t_env_list  env_list;
     t_token_list  *tokens;
     t_cmd_list  *cmds;
+    int         last_status;
 
     (void)argc;
     (void)argv;
@@ -103,6 +105,10 @@ int main(int argc, char **argv, char **envp)
         perror("env_list init failed");
         return (1);
     }
+    
+    // Initialize shell context
+    ctx.env = &env_list;
+    ctx.last_exit_code = 0;
     while (1)
     {
         input = readline("minishell$ ");
@@ -128,10 +134,10 @@ int main(int argc, char **argv, char **envp)
         }
 
         // --- SEGMENTATION ---
-        start_segmentation(tokens, &env_list);
+        start_segmentation(tokens, &ctx);
 
         // --- PARSER ---
-        cmds = start_parser(tokens, &env_list);
+        cmds = start_parser(tokens, &ctx);
         if (!cmds || cmds->syntax_error)
         {
             fprintf(stderr, "Parsing error\n");
@@ -142,7 +148,8 @@ int main(int argc, char **argv, char **envp)
         }
 
         // --- EXECUTOR ---
-        start_executor(cmds, &env_list);
+        last_status = start_executor(cmds, &ctx);
+        ctx.last_exit_code = last_status;
 
         // --- CLEANUP ---
         free_cmd_list(cmds);

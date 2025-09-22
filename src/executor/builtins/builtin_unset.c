@@ -6,63 +6,43 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 21:57:51 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 00:22:58 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:22:51 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../includes/minishell.h"
 #include "../../../includes/executor.h"
 
-void	unset_var(char **args, t_env_list *env)
+static int	unset_var(char *var_name, t_env_list *env)
 {
-	t_env_node	*current;
-	t_env_node	*prev;
-
-	if (!check_if_var_exist(args[1], env))
-		return ;
-	current = env->head;
-	prev = NULL;
-	while (current)
-	{
-		if (ft_strcmp(current->key, args[1]) == 0)
-		{
-			if (prev)
-				prev->next = current->next;
-			else
-				env->head = current->next;
-			free(current->key);
-			free(current->value);
-			free(current);
-			return ;
-		}
-		prev = current;
-		current = current->next;
-	}
+	if (!check_if_var_exist(var_name, env))
+		return (0);
+	remove_env_var(var_name, env);
+	return (0);
 }
 
-void	ft_unset(char **args, t_env_list *env)
+int	ft_unset(t_cmd_node *cmd, t_env_list *env)
 {
 	int	i;
+	int	ret;
+
+	ret = 0;
+	if (!cmd->cmd[1])
+		return (0);
 
 	i = 1;
-	if (args[i] == NULL)
+	while (cmd->cmd[i])
 	{
-		ft_putstr_fd("unset: not enough arguments\n", 2);
-		return ;
-	}
-	while (args[i] != NULL)
-	{
-		if (!is_valid_identifier(args[1]))
+		if (!is_valid_identifier(cmd->cmd[i]))
 		{
-			ft_putstr_fd(args[0], 2);
-			ft_putstr_fd(": ", 2);
-			ft_putstr_fd(args[1], 2);
-			ft_putstr_fd(": invalid parameter name\n", 2);
+			ft_putstr_fd("unset: ", 2);
+			ft_putstr_fd(cmd->cmd[i], 2);
+			ft_putstr_fd(": not a valid identifier\n", 2);
+			ret = 1;
 		}
 		else
-		{
-			unset_var(args, env);
-		}
+			unset_var(cmd->cmd[i], env);
 		i++;
 	}
+	return (ret);
 }

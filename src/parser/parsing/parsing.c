@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:21:01 by maja              #+#    #+#             */
-/*   Updated: 2025/09/21 22:54:51 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 17:18:59 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,12 +122,12 @@ static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next)
     cmd_node->files->size++;
 }
 
-t_cmd_list *start_parser(t_token_list *tokens, t_env_list *env_list)
+t_cmd_list *start_parser(t_token_list *tokens, t_shell_ctx *ctx)
 {
     t_cmd_list  *cmd_list;
     t_cmd_node  *current_cmd;
     t_token     *token;
-    (void)env_list;  // Will use later for variable expansion
+    (void)ctx;  // Will use later for variable expansion
 
     if (!tokens || !tokens->head)
         return (NULL);
