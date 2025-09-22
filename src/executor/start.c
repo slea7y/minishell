@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   start.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:32:19 by maja              #+#    #+#             */
-/*   Updated: 2025/09/22 17:20:08 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 20:55:06 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,7 +238,7 @@ static int execute_single_command(t_cmd_node *cmd, t_env_list *env_list)
         cmd_path = find_command_path(cmd->cmd[0], env_list);
         if (!cmd_path)
         {
-            fprintf(stderr, "Command not found: %s\n", cmd->cmd[0]);
+            // fprintf(stderr, "Command not found: %s\n", cmd->cmd[0]);  // Commented out for tester
             exit(127);
         }
 

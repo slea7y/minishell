@@ -6,7 +6,7 @@
 #    By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
-#    Updated: 2025/09/22 20:37:27 by tdietz-r         ###   ########.fr        #
+#    Updated: 2025/09/22 21:30:35 by tdietz-r         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -74,4 +74,16 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: clean
+	@echo "Running minishell tester..."
+	@bash 42_minishell_tester/tester.sh m
+	@echo "Cleaning up tester files..."
+	@rm -f tmp_* 0 42 '<' '>' PATH 'PATH=' export unset bla_test
+	@echo "Tester cleanup complete!"
+
+cleanup:
+	@echo "Cleaning up tester files..."
+	@rm -f tmp_* 0 42 '<' '>' PATH 'PATH=' export unset bla_test
+	@echo "Tester cleanup complete!"
+
+.PHONY: all clean fclean re test cleanup

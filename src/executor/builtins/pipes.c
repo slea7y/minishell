@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:13:57 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 00:23:26 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 20:54:11 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	handle_one_pipe(char **args, char **env_list)
 
 	if (pipe(fd) == -1)
 	{
-		ft_putstr_fd("debug: handle_one_pipe() failed creating the pipe\n", 2);
+		// ft_putstr_fd("debug: handle_one_pipe() failed creating the pipe\n", 2);  // Commented out for tester
 		perror("pipe");
 		return;
 	}
@@ -139,12 +139,12 @@ void	handle_one_pipe(char **args, char **env_list)
 // 		pidx = fork();
 // 		if (pidx < 0)
 // 		{
-// 			printf("debug: forking failed i guess :((\n");
+// 			// printf("debug: forking failed i guess :((\n");  // Commented out for tester
 // 			exit (1);
 // 		}
 // 		if (pidx == 0)
 // 		{
-// 			printf("do i ever get here??\n");
+// 			// printf("do i ever get here??\n");  // Commented out for tester
 // 			if (first_entry)
 // 			{
 // 				// tutaj musze skopiowac z normalnego imputu a nie naszych fd
@@ -159,12 +159,12 @@ void	handle_one_pipe(char **args, char **env_list)
 // 			close(fd[0]);
 // 			close(fd[1]);
 // 			first_entry = 0;
-// 			printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);
+// 			// printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);  // Commented out for tester
 // 			execute_cmd(args, env_list, i);
 // 		}
 // 		else
 // 		{
-// 			printf("popsss\n");
+// 			// printf("popsss\n");  // Commented out for tester
 // 			waitpid(pidx, NULL, 0);
 // 			return ;
 // 		}
@@ -204,19 +204,19 @@ void	handle_multiple_pipes(char **args, char **env_list)
 		{
 			if (pipe(fd) == 0)
 			{
-				ft_putstr_fd("debug: handle_multiple_pipes failed creating the pipe\n", 2);
+				// ft_putstr_fd("debug: handle_multiple_pipes failed creating the pipe\n", 2);  // Commented out for tester
 				exit (1);
 			}
 		}
 		pidx = fork();
 		if (pidx < 0)
 		{
-			printf("debug: forking failed i guess :((\n");
+			// printf("debug: forking failed i guess :((\n");  // Commented out for tester
 			exit (1);
 		}
 		if (pidx == 0)
 		{
-			printf("do i ever get here??\n");
+			// printf("do i ever get here??\n");  // Commented out for tester
 			if (first_entry)
 			{
 				// tutaj musze skopiowac z normalnego imputu a nie naszych fd
@@ -231,12 +231,12 @@ void	handle_multiple_pipes(char **args, char **env_list)
 			close(fd[0]);
 			close(fd[1]);
 			first_entry = 0;
-			printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);
+			// printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);  // Commented out for tester
 			execute_cmd(args, env_list, i);
 		}
 		else
 		{
-			printf("popsss\n");
+			// printf("popsss\n");  // Commented out for tester
 			waitpid(pidx, NULL, 0);
 			return ;
 		}
@@ -253,7 +253,7 @@ void	handle_pipes(int pipes_count, char **args, char **env_list)
 	}
 	else
 	{
-		printf("multiple pipessss???\n");
+		// printf("multiple pipessss???\n");  // Commented out for tester
 		handle_multiple_pipes(args, env_list);
 		return ;
 	}

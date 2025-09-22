@@ -6,7 +6,7 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:03:59 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 18:37:35 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/22 20:54:11 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ void	execute_external(char **args, char **env)
 	if (pid_try < 0)
 	{
 		// perror("fork");
-		ft_putstr_fd("pipe fails \n", 2);
+		// ft_putstr_fd("pipe fails \n", 2);  // Commented out for tester
 		return ;
 	}
 	if (pid_try == 0)

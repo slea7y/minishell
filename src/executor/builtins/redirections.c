@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:20:19 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 00:23:38 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 20:52:57 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,13 @@ void	handle_redirections(int red_pos, char **args, char **envp)
 {
 	if (ft_strncmp(args[red_pos], "<", 1) == 0)
 	{
-		printf("whats after %s this?: %s\n", args[red_pos], args[red_pos + 1]);
+		// printf("whats after %s this?: %s\n", args[red_pos], args[red_pos + 1]);  // Commented out for tester
 		int in_file;
 
 		in_file = open(args[red_pos + 1], O_RDONLY, 0644);
 		if (!in_file)
 		{
-			printf("smth wrong with my file\n");
+			// printf("smth wrong with my file\n");  // Commented out for tester
 			return ; //correct exit code
 		}
 		dup2(in_file, STDIN_FILENO);
@@ -43,11 +43,11 @@ void	handle_redirections(int red_pos, char **args, char **envp)
 			out_file = open(args[red_pos + 1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 		if (!out_file)
 		{
-			printf("smth wrong with my file\n");
+			// printf("smth wrong with my file\n");  // Commented out for tester
 			return ;
 		}
 		// dup2(fd[0], STDIN_FILENO);
-		printf("does it get here even??\n");
+		// printf("does it get here even??\n");  // Commented out for tester
 		dup2(out_file, STDOUT_FILENO);
 		// close(fd[1]);
 		// close(fd[0]);

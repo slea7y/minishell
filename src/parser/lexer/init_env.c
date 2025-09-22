@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_env.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:13:10 by maja              #+#    #+#             */
-/*   Updated: 2025/09/21 22:13:12 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 20:52:57 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void	init_list_env(t_env_list *env_list, char **env)
 		init = malloc(sizeof(t_env_node));
 		if (!init)
 		{
-			printf("malloc failed in init_list_env()\n");
+			// printf("malloc failed in init_list_env()\n");  // Commented out for tester
 			return ;
 		}
 		init->key = key;
