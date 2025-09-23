@@ -6,7 +6,7 @@
 #    By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
-#    Updated: 2025/09/23 15:47:00 by tdietz-r         ###   ########.fr        #
+#    Updated: 2025/09/23 18:11:06 by tdietz-r         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -80,12 +80,16 @@ test: clean
 	@echo "Running minishell tester..."
 	@bash 42_minishell_tester/tester.sh m
 	@echo "Cleaning up tester files..."
-	@rm -f tmp_* 0 42 '<' '>' PATH 'PATH=' export unset bla_test chmod 1 -r -f
+	@$(MAKE) cleanup
 	@echo "Tester cleanup complete!"
 
 cleanup:
 	@echo "Cleaning up tester files..."
 	@rm -f tmp_* 0 42 '<' '>' PATH 'PATH=' export unset bla_test chmod 1 -r -f
+	@rm -f '%s\n' ls rm touch 'minishe*l' '*a' '*a*a' '**' '***'
+	@rm -f *.txt *.log *.out *.err
+	@rm -f a.out core core.*
+	@rm -f test_* debug_* temp_*
 	@echo "Tester cleanup complete!"
 
 .PHONY: all clean fclean re test cleanup
