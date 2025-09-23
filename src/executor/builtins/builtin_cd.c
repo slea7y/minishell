@@ -6,18 +6,19 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 17:16:52 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 17:06:50 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 22:56:37 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../includes/minishell.h"
 #include "../../../includes/executor.h"
+#include "../../../includes/parser.h"
 
 static int	go_home(char *prev_pwd, t_env_list *env)
 {
 	char	*home;
 
-	home = getenv("HOME");
+	home = get_env_value(env, "HOME");
 	if (!home)
 	{
 		ft_putstr_fd("cd: HOME not set\n", 2);
@@ -29,11 +30,13 @@ static int	go_home(char *prev_pwd, t_env_list *env)
 		ft_putstr_fd("cd: ", 2);
 		ft_putstr_fd(strerror(errno), 2);
 		ft_putstr_fd("\n", 2);
+		free(home);
 		free(prev_pwd);
 		return (1);
 	}
 	change_var_value("OLDPWD", prev_pwd, env);
 	change_var_value("PWD", home, env);
+	free(home);
 	free(prev_pwd);
 	return (0);
 }
@@ -43,15 +46,11 @@ static int	go_dest(t_cmd_node *cmd, char *prev_pwd, t_env_list *env)
 	char	*curr;
 	int		ret;
 
-	// For absolute paths or special paths like "..", use them directly
 	if (cmd->cmd[1][0] == '/' || ft_strcmp(cmd->cmd[1], "..") == 0 || 
 		ft_strcmp(cmd->cmd[1], ".") == 0)
-	{
 		curr = ft_strdup(cmd->cmd[1]);
-	}
 	else
 	{
-		// For relative paths, combine with current directory
 		curr = getcwd(NULL, 0);
 		if (!curr)
 		{
@@ -103,9 +102,36 @@ int	ft_cd(t_cmd_node *cmd, t_env_list *env)
 		perror("cd");
 		return (1);
 	}
-
 	if (!cmd->cmd[1] || (ft_strcmp(cmd->cmd[1], "~") == 0))
 		return (go_home(prev_pwd, env));
+	else if (ft_strcmp(cmd->cmd[1], "-") == 0)
+	{
+		char *oldpwd = get_env_value(env, "OLDPWD");
+		if (oldpwd[0] == '\0')
+		{
+			ft_putstr_fd("cd: OLDPWD not set\n", 2);
+			free(prev_pwd);
+			return (1);
+		}
+		ft_putstr_fd(oldpwd, 1);
+		ft_putstr_fd("\n", 1);
+		if (chdir(oldpwd) != 0)
+		{
+			ft_putstr_fd("cd: ", 2);
+			ft_putstr_fd(strerror(errno), 2);
+			ft_putstr_fd(": ", 2);
+			ft_putstr_fd(oldpwd, 2);
+			ft_putstr_fd("\n", 2);
+			free(oldpwd);
+			free(prev_pwd);
+			return (1);
+		}
+		change_var_value("OLDPWD", prev_pwd, env);
+		change_var_value("PWD", oldpwd, env);
+		free(oldpwd);
+		free(prev_pwd);
+		return (0);
+	}
 	else if (ft_strcmp(cmd->cmd[1], ".") == 0)
 	{
 		free(prev_pwd);

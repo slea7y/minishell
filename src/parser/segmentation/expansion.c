@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 21:40:17 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/22 17:15:14 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/22 22:36:20 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,19 @@ char *get_exit_code(t_shell_ctx *ctx)
 
 char *get_env_value(t_env_list *env_list, char *var_name)
 {
-	(void) env_list;
-	if (ft_strcmp("USER", var_name ) == 0)
-		return("tdietz-r");
-	if (ft_strcmp("pwd", var_name)== 0)
-		return("/Users/tdietz-r/Documents/m3/minishell/src/parser");
-	if (ft_strcmp("FOO", var_name) == 0)
-		return("hello world this is a test");
-	return("");
+	t_env_node *current;
+
+	if (!env_list || !env_list->head || !var_name)
+		return (ft_strdup(""));
+	
+	current = env_list->head;
+	while (current)
+	{
+		if (ft_strcmp(current->key, var_name) == 0)
+			return (ft_strdup(current->value));
+		current = current->next;
+	}
+	return (ft_strdup(""));
 }
 
 /// @brief expands $ with given env. loops through string,
