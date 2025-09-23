@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 18:28:25 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 17:03:03 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 23:20:31 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void	add_new_var(char *key, char *value, t_env_list *env)
 {
 	t_env_node	*new;
 
-	if (!key || !value || !env)
+	if (!key || !env)
 		return ;
 	new = malloc(sizeof(t_env_node));
 	if (!new)
@@ -101,14 +101,15 @@ void	change_var_value(char *key, char *new_value, t_env_list *env)
 void	add_change_export(char *args, t_env_list *env)
 {
 	char	*break_point;
-	char	*key;
-	char	*value;
+	char	*key = NULL;
+	char	*value = NULL;
 
 	break_point = ft_strchr(args, '=');
 	if (!break_point)
 		return ;
 	key = ft_substr(args, 0, break_point - args);
 	value = ft_strdup(break_point + 1);
+	// printf("DEBUG: key: %s value %s:\n", key, value);
 	if (!check_if_var_exist(key, env))
 		add_new_var(key, value, env);
 	else

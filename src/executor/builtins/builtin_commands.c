@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_commands.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 20:08:44 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/23 16:18:26 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/23 23:17:36 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,23 @@
 int	ft_echo(t_cmd_node *cmd)
 {
 	int	i;
+	int	j;
 	int	n_flag;
 
 	i = 1;
 	n_flag = 0;
-	// Handle -n flag (only if it's the first argument and nothing else)
-	if (cmd->cmd[i] && ft_strcmp(cmd->cmd[i], "-n") == 0)
+	while (cmd->cmd[i] && cmd->cmd[i][0] == '-')
 	{
-		n_flag = 1;
-		i++;
+		j = 1;
+		while (cmd->cmd[i][j] == 'n')
+			j++;
+		if (cmd->cmd[i][j] == '\0' && j > 1)
+		{
+			n_flag = 1;
+			i++;
+		}	
+		else 
+			break;
 	}
 	while (cmd->cmd[i])
 	{
@@ -81,8 +89,10 @@ int	ft_exit(t_cmd_node *cmd)
 
 	exit_code = 0;
 	if (!cmd->cmd[1])
+	{
+		ft_putstr_fd("exit\n", 1);
 		exit(exit_code);
-	
+	}
 	if (!is_numeric(cmd->cmd[1]))
 	{
 		ft_putstr_fd("exit: numeric argument required\n", 2);
@@ -91,6 +101,7 @@ int	ft_exit(t_cmd_node *cmd)
 	exit_code = ft_atoi(cmd->cmd[1]);
 	if (cmd->cmd[2])
 	{
+		ft_putstr_fd("exit\n", 1);
 		ft_putstr_fd("exit: too many arguments\n", 2);
 		return (1);
 	}
@@ -98,6 +109,7 @@ int	ft_exit(t_cmd_node *cmd)
 	exit_code = exit_code % 256;
 	if (exit_code < 0)
 		exit_code = 256 + exit_code;
+	ft_putstr_fd("exit\n", 1);
 	exit(exit_code);
 }
 
@@ -112,7 +124,6 @@ int	ft_export(t_cmd_node *cmd, t_env_list *env)
 		sort_env(env);
 		return (ft_env(env));
 	}
-
 	i = 1;
 	while (cmd->cmd[i])
 	{

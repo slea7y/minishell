@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/23 15:47:00 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/23 22:03:01 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,10 +180,10 @@ int main(int argc, char **argv, char **envp)
 
         // --- CLEANUP ---
         // Temporarily comment out cleanup to test
-        // if (cmds)
-        //     free_cmd_list(cmds);
-        // if (tokens)
-        //     free_token_list(tokens);
+        if (cmds)
+            free_cmd_list(cmds);
+        if (tokens)
+            free_token_list(tokens);
         if (input)
             free(input);
     }

@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/02 16:51:07 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/21 21:48:25 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 21:51:03 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ int	is_numeric(char	*str)
 	if (!str || !str[0])
 		return (0);
 	i = 0;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	if (!str)
+		return (0); 
 	while (str[i])
 	{
 		if (!(str[i] >= '0' && str[i] <= '9'))
