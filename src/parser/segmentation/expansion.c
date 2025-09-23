@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expansion.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 21:40:17 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/22 22:36:20 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 16:28:48 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,14 +54,29 @@ void	expand_variables_in_segment(t_segment *segment, t_shell_ctx *ctx)
 	int		start;
 	char	*var_name;
 
-	if (!segment || !segment->value || segment->type == SEG_SINGLE_QUOTE)
+	if (!segment || !segment->value)
 		return ;
 	final_str = ft_strdup("");
 	i = 0;
 	start = 0;
 	while (segment->value[i])
 	{
-		if (segment->value[i] == '$' && segment->value[i + 1] != '\0')
+		// Handle tilde expansion (~) - only in normal and double quote segments
+		if (segment->value[i] == '~' && segment->type != SEG_SINGLE_QUOTE && 
+			(i == 0 || segment->value[i - 1] == ' ' || 
+			segment->value[i - 1] == '\t' || segment->value[i - 1] == '\n'))
+		{
+			final_str = ft_strjoin(final_str, ft_substr(segment->value, start, i
+						- start));
+			char *home = get_env_value(ctx->env, "HOME");
+			final_str = ft_strjoin(final_str, home);
+			free(home);
+			i++;
+			start = i;
+		}
+		// Handle variable expansion ($) - only in normal and double quote segments
+		else if (segment->value[i] == '$' && segment->type != SEG_SINGLE_QUOTE && 
+			segment->value[i + 1] != '\0')
 		{
 			final_str = ft_strjoin(final_str, ft_substr(segment->value, start, i
 						- start));
@@ -76,19 +91,34 @@ void	expand_variables_in_segment(t_segment *segment, t_shell_ctx *ctx)
 			}
 			else
 			{
-				while (ft_isalnum(segment->value[i])
-					|| segment->value[i] == '_')
-					i++;
-				var_name = ft_substr(segment->value, start, i - start);
-				final_str = ft_strjoin(final_str, get_env_value(ctx->env,
-							var_name));
+				// Handle empty variable name case
+				if (segment->value[i] == '\0' || segment->value[i] == ' ' || 
+					segment->value[i] == '\t' || segment->value[i] == '\n' ||
+					segment->value[i] == '"' || segment->value[i] == '\'')
+				{
+					// Empty variable name, just output the $
+					final_str = ft_strjoin(final_str, ft_strdup("$"));
+				}
+				else
+				{
+					while (ft_isalnum(segment->value[i])
+						|| segment->value[i] == '_')
+						i++;
+					var_name = ft_substr(segment->value, start, i - start);
+					char *env_value = get_env_value(ctx->env, var_name);
+					final_str = ft_strjoin(final_str, env_value);
+					free(var_name);
+					free(env_value);
+				}
 			}
 			start = i;
 		}
 		else
 			i++;
 	}
-	final_str = ft_strjoin(final_str, ft_substr(segment->value, start, i
-				- start));
+	char *remaining = ft_substr(segment->value, start, i - start);
+	final_str = ft_strjoin(final_str, remaining);
+	free(remaining);
+	free(segment->value);
 	segment->value = final_str;
 }

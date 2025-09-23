@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 21:55:42 by maja              #+#    #+#             */
-/*   Updated: 2025/09/21 22:44:44 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 16:08:12 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,20 @@ static void	handle_sigint(int sig)
 {
     (void)sig;
     write(1, "\n", 1);
-    write(1, "minishell$ ", 11);
+    rl_on_new_line();
+    rl_replace_line("", 0);
+    rl_redisplay();
+}
+
+static void	handle_sigquit(int sig)
+{
+    (void)sig;
+    // Do nothing for Ctrl+\ as per bash behavior
 }
 
 void	setup_signals(void)
 {
     // Set up the signal handlers
     signal(SIGINT, handle_sigint);   // Ctrl+C
-    signal(SIGQUIT, SIG_IGN);        // Ctrl+
+    signal(SIGQUIT, handle_sigquit); // Ctrl+backslash
 }

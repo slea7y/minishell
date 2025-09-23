@@ -109,6 +109,7 @@ bool							check_redirection(t_token_list *token_list,
 									int i);
 bool							check_token_split(t_token_list *token_list,
 									int i);
+bool							validate_quotes(t_token_list *token_list);
 
 int								handle_empty_quotes(t_token_list *token_list,
 									int i);
@@ -147,6 +148,8 @@ t_segment_list					*init_segment_list(void);
 char							*get_env_value(t_env_list *env_list,
 									char *var_name);
 char							*get_exit_code(t_shell_ctx *ctx);
+
+void							free_token_list(t_token_list *tokens);
 
 // int								ft_strcmp(const char *s1, const char *s2);
 

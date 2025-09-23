@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_commands.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 20:08:44 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 17:04:42 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 16:18:26 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ int	ft_echo(t_cmd_node *cmd)
 
 	i = 1;
 	n_flag = 0;
-	while (cmd->cmd[i] && (ft_strcmp(cmd->cmd[i], "-n") == 0))
+	// Handle -n flag (only if it's the first argument and nothing else)
+	if (cmd->cmd[i] && ft_strcmp(cmd->cmd[i], "-n") == 0)
 	{
 		n_flag = 1;
 		i++;
@@ -48,8 +49,8 @@ int	ft_pwd(void)
 		return (1);
 	}
 	ft_putstr_fd(pwd, 1);
-	free(pwd);
 	ft_putstr_fd("\n", 1);
+	free(pwd);
 	return (0);
 }
 
@@ -93,6 +94,10 @@ int	ft_exit(t_cmd_node *cmd)
 		ft_putstr_fd("exit: too many arguments\n", 2);
 		return (1);
 	}
+	// Ensure exit code is in valid range (0-255)
+	exit_code = exit_code % 256;
+	if (exit_code < 0)
+		exit_code = 256 + exit_code;
 	exit(exit_code);
 }
 

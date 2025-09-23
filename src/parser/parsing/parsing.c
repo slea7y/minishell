@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:21:01 by maja              #+#    #+#             */
-/*   Updated: 2025/09/22 17:18:59 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 16:03:48 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../includes/minishell.h"
 #include "../../../includes/parser.h"
+#include "../../../includes/heredoc.h"
 
 static t_cmd_node *create_cmd_node(t_token *token)
 {
@@ -81,6 +82,7 @@ static int add_argument(t_cmd_node *cmd_node, char *arg)
 static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next)
 {
     t_file_node *file;
+    char        *filename;
 
     if (!next || !next->value)
         return;
@@ -97,17 +99,32 @@ static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next)
     file = malloc(sizeof(t_file_node));
     if (!file)
         return;
-    file->filename = ft_strdup(next->value);
-    file->next = NULL;
-
-    if (token->token == TOKEN_INFILE)
-        file->redir_type = INFILE;
-    else if (token->token == TOKEN_OUTFILE)
-        file->redir_type = OUTFILE;
-    else if (token->token == TOKEN_APPEND)
-        file->redir_type = OUTFILE_APPEND;
-    else
+    
+    // Handle heredoc specially
+    if (token->token == TOKEN_HEREDOC)
+    {
+        filename = handle_heredoc(next->value);
+        if (!filename)
+        {
+            free(file);
+            return;
+        }
+        file->filename = filename;
         file->redir_type = HEREDOC;
+    }
+    else
+    {
+        file->filename = ft_strdup(next->value);
+        if (token->token == TOKEN_INFILE)
+            file->redir_type = INFILE;
+        else if (token->token == TOKEN_OUTFILE)
+            file->redir_type = OUTFILE;
+        else if (token->token == TOKEN_APPEND)
+            file->redir_type = OUTFILE_APPEND;
+        else
+            file->redir_type = HEREDOC;
+    }
+    file->next = NULL;
 
     if (!cmd_node->files->head)
     {

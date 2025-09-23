@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   tokanisation.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/03 17:25:10 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/21 22:12:33 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 16:03:25 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../includes/minishell.h"
 #include "../../../includes/parser.h"
+#include "../../../includes/syntax_validation.h"
 
 /// @brief goes through the prompt and checks for different chars for token types
 /// @param token_list The token list to populate
@@ -57,12 +58,29 @@ t_token_list	*start_lexer(char *prompt)
 	if (!token_list)
 		return (NULL);
 	
-	split_tokenisation(token_list);
-	if (token_list->found_error)
+	// Validate quotes before tokenization
+	if (!validate_quotes(token_list))
 	{
-		// TODO: Add cleanup function here
+		token_list->found_error = 1;
 		free(token_list);
 		return (NULL);
 	}
+	
+	split_tokenisation(token_list);
+	if (token_list->found_error)
+	{
+		// Clean up token list on error
+		free_token_list(token_list);
+		return (NULL);
+	}
+	
+	// Validate overall syntax after tokenization
+	if (!validate_syntax(token_list))
+	{
+		token_list->found_error = 1;
+		free_token_list(token_list);
+		return (NULL);
+	}
+	
 	return (token_list);
 }

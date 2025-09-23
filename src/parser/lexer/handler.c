@@ -6,27 +6,20 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 22:42:56 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/22 20:52:57 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/23 17:30:55 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../includes/parser.h"
 
-/// @brief identifies the quote type from a empty
-/// quote passes the char and following char to found_token
+/// @brief handles empty quotes by creating empty string token
 /// @param token_list
-/// @param i position of first char after quotes incremented before passing
+/// @param i position of first quote char
+/// @return position after both quotes
 int	handle_empty_quotes(t_token_list *token_list, int i)
 {
-	char			quote_char;
-	t_token_type	token_type;
-
-	quote_char = token_list->prompt[i];
-	if (quote_char == '"')
-		token_type = TOKEN_DOUBLE_QUOTES;
-	else
-		token_type = TOKEN_SINGLE_QUOTES;
-	found_token(token_list, i, i + 1, token_type);
+	(void)token_list;
+	// Skip empty quotes - don't create any token
 	return (i + 2);
 }
 
@@ -96,27 +89,14 @@ int	handle_word_in_quotes(t_token_list *token_list, int i)
 {
 	char	quote_type;
 
-	// printf("DEBUG: handle_word_in_quotes called with i=%d, char='%c'\n", i,
-	// 	token_list->prompt[i]);  // Commented out for tester
 	quote_type = token_list->prompt[i];
-	// printf("DEBUG: quote_type='%c'\n", quote_type);  // Commented out for tester
 	i++;
-	// printf("DEBUG: starting search at i=%d\n", i);  // Commented out for tester
 	while (token_list->prompt[i] && token_list->prompt[i] != quote_type)
-	{
-		// printf("DEBUG: checking i=%d, char='%c'\n", i, token_list->prompt[i]);  // Commented out for tester
 		i++;
-	}
-	// printf("DEBUG: loop ended at i=%d, char='%c'\n", i,
-	// 	token_list->prompt[i] ? token_list->prompt[i] : '\0');  // Commented out for tester
 	if (token_list->prompt[i] == quote_type)
-	{
-		// printf("DEBUG: Found closing quote at i=%d\n", i);  // Commented out for tester
 		return (i + 1);
-	}
 	if (!token_list->prompt[i])
 	{
-		// printf("DEBUG: ERROR- Reached end of string without closing quote. Handle_word_in_quotes\n");  // Commented out for tester
 		token_list->found_error = 1;
 		ft_putstr_fd("minishell: syntax error: unclosed quotes\n", 2);
 		return (i);
@@ -169,7 +149,7 @@ int	handle_word_master(t_token_list *token_list, int i)
 			i++;
 	}
 	found_token(token_list, start, i, TOKEN_WORD);
-	return (i + 1);
+	return (i);
 }
 
 /// @brief handles ampersand token & calls found_token with token_type ampersand

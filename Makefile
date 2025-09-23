@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: maja <maja@student.42.fr>                  +#+  +:+       +#+         #
+#    By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
-#    Updated: 2025/09/23 14:36:01 by maja             ###   ########.fr        #
+#    Updated: 2025/09/23 15:47:00 by tdietz-r         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,8 @@ SRC = ./main.c \
 	src/parser/segmentation/segmentation_handler.c \
 	src/parser/segmentation/expansion.c \
 	src/parser/lexer/init.c \
+	src/parser/heredoc/heredoc.c \
+	src/parser/validation/syntax_validation.c \
 	src/executor/builtins/builtin_cd.c \
 	src/executor/builtins/builtin_commands.c \
 	src/executor/builtins/builtin_unset.c \

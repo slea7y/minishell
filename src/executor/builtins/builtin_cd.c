@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 17:16:52 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 22:56:37 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 17:51:45 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ static int	go_home(char *prev_pwd, t_env_list *env)
 	}
 	if (chdir(home) != 0)
 	{
-		ft_putstr_fd("cd: ", 2);
+		ft_putstr_fd("minishell: cd: ", 2);
 		ft_putstr_fd(strerror(errno), 2);
 		ft_putstr_fd("\n", 2);
 		free(home);
@@ -100,6 +100,12 @@ int	ft_cd(t_cmd_node *cmd, t_env_list *env)
 	if (!prev_pwd)
 	{
 		perror("cd");
+		return (1);
+	}
+	if (cmd->cmd[2] != NULL)
+	{
+		ft_putstr_fd("cd: too many arguments\n", 2);
+		free(prev_pwd);
 		return (1);
 	}
 	if (!cmd->cmd[1] || (ft_strcmp(cmd->cmd[1], "~") == 0))

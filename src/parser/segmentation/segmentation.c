@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   segmentation.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/05 20:13:13 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/22 17:21:28 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 17:20:19 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ void	dissect_token(t_token *token)
 			continue ;
 		i++;
 	}
+	// Add remaining text as normal segment (only if there is text)
 	if (i > start)
 		add_segment_to_token(token, ft_substr(token->value, start, i - start),
 			SEG_NORMAL_QUOTE);
@@ -116,6 +117,23 @@ void	dissect_token(t_token *token)
 // 	recursive_dissector(token, 0, 0);
 // }
 
+/// @brief strips quotes from segments and joins them to final token
+/// @param token
+static void	strip_quotes_from_segments(t_token *token)
+{
+	t_segment	*current_seg;
+
+	if (!token || !token->segment_list || !token->segment_list->head)
+		return ;
+	current_seg = token->segment_list->head;
+	while (current_seg)
+	{
+		// Quotes are already stripped in segmentation_handler.c
+		// This function is kept for potential future use
+		current_seg = current_seg->next;
+	}
+}
+
 /// @brief loops through the segments and joins the segments to the final token
 /// @param token
 void	assemble_final_token(t_token *token)
@@ -125,11 +143,12 @@ void	assemble_final_token(t_token *token)
 
 	if (!token || !token->segment_list || !token->segment_list->head)
 		return ;
+	strip_quotes_from_segments(token);
 	new_value = ft_strdup("");
 	current_seg = token->segment_list->head;
 	while (current_seg)
 	{
-		if (current_seg->value)
+		if (current_seg->value && ft_strlen(current_seg->value) > 0)
 			new_value = ft_strjoin(new_value, current_seg->value);
 		current_seg = current_seg->next;
 	}

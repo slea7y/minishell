@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   checker.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 22:43:15 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/22 15:00:39 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/23 15:38:21 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,13 @@ bool	check_space(char c)
 }
 
 
-//!!!!!!!!!!!!! needs update to fix edgecase with ""hello
-/// @brief checks if current and following char are of the same quote_types
+/// @brief checks if current and following char are empty quotes
 /// @param token_list and i for index
-/// @return true for quote, false for no quote
+/// @return true for empty quotes, false otherwise
 bool	check_empty_quote(t_token_list *token_list, int i)
 {
+	if (!token_list->prompt[i + 1])
+		return (false);
 	if (token_list->prompt[i] == '"' && token_list->prompt[i + 1] == '"')
 		return (true);
 	if (token_list->prompt[i] == '\'' && token_list->prompt[i + 1] == '\'')
@@ -78,6 +79,43 @@ bool	check_quote(t_token_list *token_list, int i)
 	if (token_list->prompt[i] == '"' || token_list->prompt[i] == '\'')
 		return (true);
 	return (false);
+}
+
+/// @brief validates quote syntax in the entire prompt
+/// @param token_list
+/// @return true if quotes are valid, false if syntax error
+bool	validate_quotes(t_token_list *token_list)
+{
+	int		i;
+	char	quote_char;
+	bool	in_quotes;
+
+	if (!token_list || !token_list->prompt)
+		return (false);
+	i = 0;
+	in_quotes = false;
+	quote_char = 0;
+	while (token_list->prompt[i])
+	{
+		if (!in_quotes && (token_list->prompt[i] == '"' || 
+			token_list->prompt[i] == '\''))
+		{
+			in_quotes = true;
+			quote_char = token_list->prompt[i];
+		}
+		else if (in_quotes && token_list->prompt[i] == quote_char)
+		{
+			in_quotes = false;
+			quote_char = 0;
+		}
+		i++;
+	}
+	if (in_quotes)
+	{
+		ft_putstr_fd("minishell: syntax error: unclosed quotes\n", 2);
+		return (false);
+	}
+	return (true);
 }
 
 /// @brief checks if current char is a redirection

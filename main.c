@@ -6,13 +6,14 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/22 21:13:28 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/23 15:47:00 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/minishell.h"
 #include "includes/parser.h"
 #include "includes/executor.h"
+#include "includes/heredoc.h"
 // #include "includes/.h"
 // #include "includes/executor.h"
 // #include "minishell.h"
@@ -31,7 +32,13 @@ void    free_file_list(t_file_list *file_list)
     {
         next = current->next;
         if (current->filename)
-            free(current->filename);
+        {
+            // Clean up heredoc temp files
+            if (current->redir_type == HEREDOC)
+                cleanup_heredoc(current->filename);
+            else
+                free(current->filename);
+        }
         free(current);
         current = next;
     }
