@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/23 22:03:01 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,5 +191,5 @@ int main(int argc, char **argv, char **envp)
     // TODO: free env_list when done
     // Temporarily comment out env cleanup to test
     // free_env_list(&env_list);
-    return (0);
+    return (ctx.last_exit_code);
 }

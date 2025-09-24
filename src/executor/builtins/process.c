@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:03:59 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 20:54:11 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ void	execute_cmd(char **args, char **env, int place)
 // }
 
 // ;
-void	execute_external(char **args, char **env)
+int	execute_external(char **args, char **env)
 {
 	pid_t	pid_try;
 	// pid_t	parent_id;
@@ -143,26 +143,35 @@ void	execute_external(char **args, char **env)
 	{
 		// perror("fork");
 		// ft_putstr_fd("pipe fails \n", 2);  // Commented out for tester
-		return ;
+		return (1);
 	}
 	if (pid_try == 0)
 	{
-		if (check_for_redirections(args, env))
-		// check_for_redirections(args, env);
-			exit (1);
-		else if (detect_pipes(args, env))
-			exit (1);
+		// Handle redirections first (this modifies the args array)
+		check_for_redirections(args, env);
+		
+		// Then check for pipes or execute command normally
+		int exit_code = 0;
+		if ((exit_code = detect_pipes(args, env)) != 0)
+			exit(exit_code); // detect_pipes handles its own execution and returns exit code
 		else
 		{
 			execute_cmd(args, env, 0);
-			exit (1);
+			exit(1); // This should never be reached as execute_cmd calls exit()
 		}
-		return ;
 	}
 	else
 	{
-		waitpid(pid_try, NULL, 0);
+		int status;
+		waitpid(pid_try, &status, 0);
 		// printf("hello its ur pops\n");
-		return ;
+		
+		// Return the exit code from the child process
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status));
+		else if (WIFSIGNALED(status))
+			return (128 + WTERMSIG(status));
+		else
+			return (1);
 	}
 }

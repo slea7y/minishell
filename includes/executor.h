@@ -19,10 +19,14 @@ int start_executor(t_cmd_list *cmds, t_shell_ctx *ctx);
 
 // String and utility functions
 int	detect_pipes(char **args, char **env_list);
+int	handle_pipes(int pipes_count, char **args, char **env_list);
+int	handle_one_pipe(char **args, char **env_list);
+int	handle_multiple_pipes(char **args, char **env_list);
 
 // Environment functions
 int	check_for_redirections(char **args, char **envp);
 void	execute_cmd(char **args, char **env, int place);
+int	execute_external(char **args, char **env);
 int	check_if_var_exist(char *key, t_env_list *env);
 void	change_var_value(char *key, char *new_value, t_env_list *env);
 int	is_numeric(char	*str);
@@ -45,6 +49,5 @@ int		ft_unset(t_cmd_node *cmd, t_env_list *env_list);
 // Env and execution helpers
 char	**dup_env(char **env);
 // void	init_list_env(t_env_list *env_list, char **envp);
-void	execute_external(char **args, char **envp);
 
 #endif

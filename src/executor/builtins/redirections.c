@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:20:19 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 20:52:57 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 void	handle_redirections(int red_pos, char **args, char **envp)
 {
+	(void)envp; // envp not used in this function
 	if (ft_strncmp(args[red_pos], "<", 1) == 0)
 	{
 		// printf("whats after %s this?: %s\n", args[red_pos], args[red_pos + 1]);  // Commented out for tester
@@ -55,8 +56,8 @@ void	handle_redirections(int red_pos, char **args, char **envp)
 		args[red_pos] = NULL;
 		return ;
 	}
-	execute_external(args, envp);
-	exit (1);
+	// Redirection handled, let normal execution flow continue
+	return ;
 }
 
 int	check_for_redirections(char **args, char **envp)
@@ -72,11 +73,11 @@ int	check_for_redirections(char **args, char **envp)
 			|| ft_strncmp(args[i], "<<", 2) == 0)
 		{
 			handle_redirections(i, args, envp);
-			return (1);
+			return (1); // Return 1 to indicate redirections were found and handled
 		}
 		i++;
 	}
-	return (0);
+	return (0); // Return 0 to indicate no redirections found
 }
 
 // ◦ > should redirect output.

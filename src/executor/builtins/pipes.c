@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:13:57 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/22 20:54:11 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/24 14:20:48 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include "../../../includes/minishell.h"
 #include "../../../includes/executor.h"
 
-void	handle_one_pipe(char **args, char **env_list)
+int	handle_one_pipe(char **args, char **env_list)
 {
 	int fd[2];
 	pid_t id1, id2;
@@ -26,7 +26,7 @@ void	handle_one_pipe(char **args, char **env_list)
 	{
 		// ft_putstr_fd("debug: handle_one_pipe() failed creating the pipe\n", 2);  // Commented out for tester
 		perror("pipe");
-		return;
+		return (1);
 	}
 	// znajdź pozycję pipe
 	while (args[i] && ft_strcmp(args[i], "|") != 0)
@@ -34,7 +34,7 @@ void	handle_one_pipe(char **args, char **env_list)
 	if (!args[i] || !args[i + 1])
 	{
 		ft_putstr_fd("minishell: parse error near `|'\n", 2);
-		return;
+		return (1);
 	}
 	args[i] = NULL; // odcinamy pierwsze polecenie
 	char **cmd1 = args;
@@ -47,7 +47,7 @@ void	handle_one_pipe(char **args, char **env_list)
 		close(fd[0]);
 		close(fd[1]);
 		execute_cmd(cmd1, env_list, 0);
-		exit(1);
+		exit(1); // This should never be reached as execute_cmd calls exit()
 	}
 	// printf ("do i even get here?\n");
 	id2 = fork();
@@ -57,13 +57,23 @@ void	handle_one_pipe(char **args, char **env_list)
 		close(fd[1]);
 		close(fd[0]);
 		execute_cmd(cmd2, env_list, 0);
-		exit(1);
+		exit(1); // This should never be reached as execute_cmd calls exit()
 	}
 
 	close(fd[0]);
 	close(fd[1]);
-	waitpid(id1, NULL, 0);
-	waitpid(id2, NULL, 0);
+	
+	int status1, status2;
+	waitpid(id1, &status1, 0);
+	waitpid(id2, &status2, 0);
+	
+	// Return the exit code of the last command in the pipe
+	if (WIFEXITED(status2))
+		return (WEXITSTATUS(status2));
+	else if (WIFSIGNALED(status2))
+		return (128 + WTERMSIG(status2));
+	else
+		return (1);
 }
 
 // void handle_multiple_pipes(char **args, char **env)
@@ -183,7 +193,7 @@ void	handle_one_pipe(char **args, char **env_list)
 
 
 
-void	handle_multiple_pipes(char **args, char **env_list)
+int	handle_multiple_pipes(char **args, char **env_list)
 {
 	pid_t	pidx;
 	int		fd[2];
@@ -233,29 +243,36 @@ void	handle_multiple_pipes(char **args, char **env_list)
 			first_entry = 0;
 			// printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);  // Commented out for tester
 			execute_cmd(args, env_list, i);
+			exit(1); // This should never be reached as execute_cmd calls exit()
 		}
 		else
 		{
 			// printf("popsss\n");  // Commented out for tester
-			waitpid(pidx, NULL, 0);
-			return ;
+			int status;
+			waitpid(pidx, &status, 0);
+			// Return the exit code of the last command
+			if (WIFEXITED(status))
+				return (WEXITSTATUS(status));
+			else if (WIFSIGNALED(status))
+				return (128 + WTERMSIG(status));
+			else
+				return (1);
 		}
 		i = j + 1;
 	}
+	return (0); // Should never reach here
 }
 
-void	handle_pipes(int pipes_count, char **args, char **env_list)
+int	handle_pipes(int pipes_count, char **args, char **env_list)
 {
 	if (pipes_count == 1)
 	{
-		handle_one_pipe(args, env_list);
-		return ;
+		return (handle_one_pipe(args, env_list));
 	}
 	else
 	{
 		// printf("multiple pipessss???\n");  // Commented out for tester
-		handle_multiple_pipes(args, env_list);
-		return ;
+		return (handle_multiple_pipes(args, env_list));
 	}
 }
 
@@ -278,8 +295,7 @@ int	detect_pipes(char **args, char **env_list)
 	if (pipes_count >= 1)
 	{
 		// printf("pipe!\n");
-		handle_pipes(pipes_count, args, env_list);
-		return (1);
+		return (handle_pipes(pipes_count, args, env_list));
 	}
 	return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   start.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:32:19 by maja              #+#    #+#             */
-/*   Updated: 2025/09/23 16:18:26 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/24 14:15:44 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,7 @@ static int execute_single_command(t_cmd_node *cmd, t_env_list *env_list)
     char *cmd_path;
     int exit_code = 0;
 
-    if (is_builtin(cmd->cmd[0]))
+    if (cmd->cmd_type == BUILTIN)
         return execute_builtin(cmd, env_list);
 
     pid = fork();
