@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 23:07:36 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/21 22:14:19 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/25 01:51:29 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,4 +76,5 @@ void	found_token(t_token_list *token_list, int start, int end,
 	if (!value)
 		return ;
 	add_token(token_list, value, token_type);
+	free(value);
 }

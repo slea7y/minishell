@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expansion.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 21:40:17 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/23 16:28:48 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/25 01:51:24 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,9 @@ void	expand_variables_in_segment(t_segment *segment, t_shell_ctx *ctx)
 			(i == 0 || segment->value[i - 1] == ' ' || 
 			segment->value[i - 1] == '\t' || segment->value[i - 1] == '\n'))
 		{
-			final_str = ft_strjoin(final_str, ft_substr(segment->value, start, i
-						- start));
+			char *before_tilde = ft_substr(segment->value, start, i - start);
+			final_str = ft_strjoin(final_str, before_tilde);
+			free(before_tilde);
 			char *home = get_env_value(ctx->env, "HOME");
 			final_str = ft_strjoin(final_str, home);
 			free(home);
@@ -78,8 +79,9 @@ void	expand_variables_in_segment(t_segment *segment, t_shell_ctx *ctx)
 		else if (segment->value[i] == '$' && segment->type != SEG_SINGLE_QUOTE && 
 			segment->value[i + 1] != '\0')
 		{
-			final_str = ft_strjoin(final_str, ft_substr(segment->value, start, i
-						- start));
+			char *before_dollar = ft_substr(segment->value, start, i - start);
+			final_str = ft_strjoin(final_str, before_dollar);
+			free(before_dollar);
 			i++;
 			start = i;
 			if (segment->value[i] == '?')
@@ -97,7 +99,9 @@ void	expand_variables_in_segment(t_segment *segment, t_shell_ctx *ctx)
 					segment->value[i] == '"' || segment->value[i] == '\'')
 				{
 					// Empty variable name, just output the $
-					final_str = ft_strjoin(final_str, ft_strdup("$"));
+					char *dollar_str = ft_strdup("$");
+					final_str = ft_strjoin(final_str, dollar_str);
+					free(dollar_str);
 				}
 				else
 				{

@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/25 01:51:25 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,8 +188,7 @@ int main(int argc, char **argv, char **envp)
             free(input);
     }
 
-    // TODO: free env_list when done
-    // Temporarily comment out env cleanup to test
-    // free_env_list(&env_list);
+    // Free env_list when done
+    // free_env_list(&env_list);  // Temporarily commented out to debug segfault
     return (ctx.last_exit_code);
 }

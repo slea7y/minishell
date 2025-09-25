@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:03:59 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/25 01:51:25 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,13 +87,12 @@ void	execute_cmd(char **args, char **env, int place)
 	paths = find_full_path();
 	while (paths[i] && paths)
 	{
-		path_to_cmd = malloc((ft_strlen(args[place]) + 1) + (ft_strlen(paths[i]) + 1));
+		path_to_cmd = ft_strjoin(paths[i], "/");
 		if (!path_to_cmd)
 			return ;
-		path_to_cmd = ft_strjoin(path_to_cmd, paths[i]);
-		path_to_cmd = ft_strjoin(args[0], "/");
-		path_to_cmd = ft_strjoin(paths[i], "/");
-		path_to_cmd = ft_strjoin(path_to_cmd, args[place]);
+		char *temp = ft_strjoin(path_to_cmd, args[place]);
+		free(path_to_cmd);
+		path_to_cmd = temp;
 		// printf("%s\n", path_to_cmd);
 		if (access(path_to_cmd, X_OK) == 0)
 		{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   segmentation.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/05 20:13:13 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/23 17:20:19 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/25 01:51:24 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,11 @@ static t_segment	*create_and_fill_segment(char *value, t_seg_quote_type type)
 	segment->value = ft_strdup(value);
 	segment->type = type;
 	segment->next = NULL;
-	if (!type)
+	if (!segment->value)
+	{
+		free(segment);
 		return (NULL);
+	}
 	return (segment);
 }
 
@@ -72,10 +75,32 @@ void	dissect_token(t_token *token)
 {
 	int	i;
 	int	start;
+	int	len;
 
 	if (!token || !token->value)
 		return ;
 	// printf("  dissect_token called for: %s\n", token->value); // debug
+	
+	// Check if the entire token is quoted
+	len = ft_strlen(token->value);
+	if (len >= 2 && ((token->value[0] == '\'' && token->value[len - 1] == '\'') ||
+		(token->value[0] == '"' && token->value[len - 1] == '"')))
+	{
+		// Entire token is quoted, create a single segment with the content (without outer quotes)
+		char *content = ft_substr(token->value, 1, len - 2);
+		if (content)
+		{
+			// For single quotes: content is literal, no quotes in output
+			// For double quotes: content can have variable expansion, no quotes in output
+			if (token->value[0] == '\'')
+				add_segment_to_token(token, content, SEG_SINGLE_QUOTE);
+			else
+				add_segment_to_token(token, content, SEG_DOUBLE_QUOTE);
+			free(content);
+		}
+		return;
+	}
+
 	i = 0;
 	start = 0;
 	while (token->value[i])
@@ -86,8 +111,14 @@ void	dissect_token(t_token *token)
 	}
 	// Add remaining text as normal segment (only if there is text)
 	if (i > start)
-		add_segment_to_token(token, ft_substr(token->value, start, i - start),
-			SEG_NORMAL_QUOTE);
+	{
+		char *remaining = ft_substr(token->value, start, i - start);
+		if (remaining)
+		{
+			add_segment_to_token(token, remaining, SEG_NORMAL_QUOTE);
+			free(remaining);
+		}
+	}
 }
 
 // static void	recursive_dissector(t_token *token, int i, int start)
@@ -128,7 +159,8 @@ static void	strip_quotes_from_segments(t_token *token)
 	current_seg = token->segment_list->head;
 	while (current_seg)
 	{
-		// Quotes are already stripped in segmentation_handler.c
+		// For single and double quoted segments, the quotes should be stripped
+		// The content is already without quotes, so we don't need to do anything here
 		// This function is kept for potential future use
 		current_seg = current_seg->next;
 	}
@@ -148,8 +180,12 @@ void	assemble_final_token(t_token *token)
 	current_seg = token->segment_list->head;
 	while (current_seg)
 	{
-		if (current_seg->value && ft_strlen(current_seg->value) > 0)
+		if (current_seg->value)
+		{
+			// For single and double quoted segments, the quotes are already stripped
+			// Just concatenate the content
 			new_value = ft_strjoin(new_value, current_seg->value);
+		}
 		current_seg = current_seg->next;
 	}
 	token->value = new_value;
