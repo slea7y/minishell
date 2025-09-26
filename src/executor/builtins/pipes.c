@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:13:57 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/24 14:20:48 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 22:04:20 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,38 +24,39 @@ int	handle_one_pipe(char **args, char **env_list)
 
 	if (pipe(fd) == -1)
 	{
-		// ft_putstr_fd("debug: handle_one_pipe() failed creating the pipe\n", 2);  // Commented out for tester
 		perror("pipe");
 		return (1);
 	}
-	// znajdź pozycję pipe
 	while (args[i] && ft_strcmp(args[i], "|") != 0)
 		i++;
 	if (!args[i] || !args[i + 1])
 	{
 		ft_putstr_fd("minishell: parse error near `|'\n", 2);
+		close(fd[0]);
+		close(fd[1]);
 		return (1);
 	}
-	args[i] = NULL; // odcinamy pierwsze polecenie
+	args[i] = NULL; 
 	char **cmd1 = args;
 	char **cmd2 = &args[i + 1];
 
 	id1 = fork();
 	if (id1 == 0)
 	{
-		dup2(fd[1], STDOUT_FILENO);
-		close(fd[0]);
-		close(fd[1]);
+		dup2(fd[1], STDOUT_FILENO);  // Redirect stdout to pipe write end
+		close(fd[0]);  // Close read end
+		close(fd[1]);  // Close write end (after dup2)
+		check_for_redirections(cmd1, env_list);
 		execute_cmd(cmd1, env_list, 0);
 		exit(1); // This should never be reached as execute_cmd calls exit()
 	}
-	// printf ("do i even get here?\n");
 	id2 = fork();
 	if (id2 == 0)
 	{
-		dup2(fd[0], STDIN_FILENO);
-		close(fd[1]);
-		close(fd[0]);
+		dup2(fd[0], STDIN_FILENO);   // Redirect stdin to pipe read end
+		close(fd[0]);  // Close read end (after dup2)
+		close(fd[1]);  // Close write end
+		check_for_redirections(cmd2, env_list);
 		execute_cmd(cmd2, env_list, 0);
 		exit(1); // This should never be reached as execute_cmd calls exit()
 	}
@@ -196,13 +197,75 @@ int	handle_one_pipe(char **args, char **env_list)
 int	handle_multiple_pipes(char **args, char **env_list)
 {
 	pid_t	pidx;
-	int		fd[2];
+	int		**pipes;
 	int		i;
 	int		j;
-	int		first_entry;
+	int		last_exit_code = 0;
+	pid_t	*pids = NULL;
+	int		pid_count = 0;
+	int		pid_index = 0;
+	int		pipe_count = 0;
+
+	// Count commands first
+	i = 0;
+	while (args[i])
+	{
+		j = i;
+		while (args[j] && strcmp(args[j], "|") != 0)
+			j++;
+		pid_count++;
+		i = j + 1;
+	}
+	pipe_count = pid_count - 1; // Number of pipes = commands - 1
+	pids = malloc(sizeof(pid_t) * pid_count);
+	if (!pids)
+		return (1);
+	pipes = malloc(sizeof(int*) * pipe_count);
+	if (!pipes)
+	{
+		free(pids);
+		return (1);
+	}
+	i = 0;
+	while (i < pipe_count)
+	{
+		pipes[i] = malloc(sizeof(int) * 2);
+		if (!pipes[i])
+		{
+			j = 0;
+			while (j < i)
+			{
+				free(pipes[j]);
+				j++;
+			}
+			free(pipes);
+			free(pids);
+			return (1);
+		}
+		i++;
+	}
 
 	i = 0;
-	first_entry = 1;
+	while (i < pipe_count)
+	{
+		if (pipe(pipes[i]) == -1)
+		{
+			j = 0;
+			while (j <= i)
+			{
+				free(pipes[j]);
+				j++;
+			}
+			free(pipes);
+			free(pids);
+			return (1);
+		}
+		i++;
+	}
+
+	// Execute commands
+	i = 0;
+	pid_index = 0;
 	while (args[i])
 	{
 		j = i;
@@ -210,70 +273,92 @@ int	handle_multiple_pipes(char **args, char **env_list)
 			j++;
 		if (args[j])
 			args[j] = NULL;
-		if (args[j])
-		{
-			if (pipe(fd) == 0)
-			{
-				// ft_putstr_fd("debug: handle_multiple_pipes failed creating the pipe\n", 2);  // Commented out for tester
-				exit (1);
-			}
-		}
+
 		pidx = fork();
 		if (pidx < 0)
 		{
-			// printf("debug: forking failed i guess :((\n");  // Commented out for tester
-			exit (1);
+			j = 0;
+			while (j < pipe_count)
+			{
+				free(pipes[j]);
+				j++;
+			}
+			free(pipes);
+			free(pids);
+			return (1);
 		}
 		if (pidx == 0)
 		{
-			// printf("do i ever get here??\n");  // Commented out for tester
-			if (first_entry)
+			// Child process
+			// Connect stdin from previous pipe (if not first command)
+			if (pid_index > 0)
+				dup2(pipes[pid_index - 1][0], STDIN_FILENO);
+			
+			// Connect stdout to next pipe (if not last command)
+			if (pid_index < pipe_count)
+				dup2(pipes[pid_index][1], STDOUT_FILENO);
+			
+			j = 0;
+			while (j < pipe_count)
 			{
-				// tutaj musze skopiowac z normalnego imputu a nie naszych fd
-				dup2(fd[1], STDOUT_FILENO);
+				close(pipes[j][0]);
+				close(pipes[j][1]);
+				j++;
 			}
-			else
-			{
-				dup2(fd[0], STDIN_FILENO);
-				dup2(fd[1], STDOUT_FILENO);
-				// tu robie calle pomiedzy fd
-			}
-			close(fd[0]);
-			close(fd[1]);
-			first_entry = 0;
-			// printf("ktore wejscie %i\nco za komeda %s\n", i, args[i]);  // Commented out for tester
+			
+			// Handle redirections after pipe setup (redirections override pipes)
+			check_for_redirections(args, env_list);
+			
 			execute_cmd(args, env_list, i);
 			exit(1); // This should never be reached as execute_cmd calls exit()
 		}
 		else
 		{
-			// printf("popsss\n");  // Commented out for tester
-			int status;
-			waitpid(pidx, &status, 0);
-			// Return the exit code of the last command
-			if (WIFEXITED(status))
-				return (WEXITSTATUS(status));
-			else if (WIFSIGNALED(status))
-				return (128 + WTERMSIG(status));
-			else
-				return (1);
+			// Parent process
+			pids[pid_index++] = pidx;
 		}
 		i = j + 1;
 	}
-	return (0); // Should never reach here
+
+	i = 0;
+	while (i < pipe_count)
+	{
+		close(pipes[i][0]);
+		close(pipes[i][1]);
+		i++;
+	}
+
+	int status;
+	i = 0;
+	while (i < pid_count)
+	{
+		waitpid(pids[i], &status, 0);
+		if (WIFEXITED(status))
+			last_exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			last_exit_code = 128 + WTERMSIG(status);
+		else
+			last_exit_code = 1;
+		i++;
+	}
+
+	i = 0;
+	while (i < pipe_count)
+	{
+		free(pipes[i]);
+		i++;
+	}
+	free(pipes);
+	free(pids);
+	return (last_exit_code);
 }
 
 int	handle_pipes(int pipes_count, char **args, char **env_list)
 {
 	if (pipes_count == 1)
-	{
 		return (handle_one_pipe(args, env_list));
-	}
 	else
-	{
-		// printf("multiple pipessss???\n");  // Commented out for tester
 		return (handle_multiple_pipes(args, env_list));
-	}
 }
 
 int	detect_pipes(char **args, char **env_list)

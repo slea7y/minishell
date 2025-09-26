@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 18:20:19 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/24 14:49:36 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 20:47:35 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,15 @@ void	handle_redirections(int red_pos, char **args, char **envp)
 	(void)envp; // envp not used in this function
 	if (ft_strncmp(args[red_pos], "<", 1) == 0)
 	{
-		// printf("whats after %s this?: %s\n", args[red_pos], args[red_pos + 1]);  // Commented out for tester
 		int in_file;
 
 		in_file = open(args[red_pos + 1], O_RDONLY, 0644);
-		if (!in_file)
+		if (in_file == -1)
 		{
-			// printf("smth wrong with my file\n");  // Commented out for tester
-			return ; //correct exit code
+			ft_putstr_fd("minishell: ", 2);
+			ft_putstr_fd(args[red_pos + 1], 2);
+			ft_putstr_fd(": No such file or directory\n", 2);
+			exit(1);
 		}
 		dup2(in_file, STDIN_FILENO);
 		close(in_file);
@@ -42,16 +43,14 @@ void	handle_redirections(int red_pos, char **args, char **envp)
 			out_file = open(args[red_pos + 1], O_CREAT | O_WRONLY | O_APPEND, 0644);
 		else
 			out_file = open(args[red_pos + 1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
-		if (!out_file)
+		if (out_file == -1)
 		{
-			// printf("smth wrong with my file\n");  // Commented out for tester
-			return ;
+			ft_putstr_fd("minishell: ", 2);
+			ft_putstr_fd(args[red_pos + 1], 2);
+			ft_putstr_fd(": No such file or directory\n", 2);
+			exit(1);
 		}
-		// dup2(fd[0], STDIN_FILENO);
-		// printf("does it get here even??\n");  // Commented out for tester
 		dup2(out_file, STDOUT_FILENO);
-		// close(fd[1]);
-		// close(fd[0]);
 		close(out_file);
 		args[red_pos] = NULL;
 		return ;

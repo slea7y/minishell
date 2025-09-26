@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:03:59 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/25 01:51:25 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 22:05:42 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,15 +146,13 @@ int	execute_external(char **args, char **env)
 	}
 	if (pid_try == 0)
 	{
-		// Handle redirections first (this modifies the args array)
-		check_for_redirections(args, env);
-		
-		// Then check for pipes or execute command normally
+		// Check for pipes or execute command normally
 		int exit_code = 0;
 		if ((exit_code = detect_pipes(args, env)) != 0)
 			exit(exit_code); // detect_pipes handles its own execution and returns exit code
 		else
 		{
+			check_for_redirections(args, env);
 			execute_cmd(args, env, 0);
 			exit(1); // This should never be reached as execute_cmd calls exit()
 		}
