@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/26 01:55:24 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 21:58:12 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,7 @@ void	process_single_command(char *command, t_shell_ctx *ctx)
 	tokens = start_lexer(command);
 	if (!tokens || tokens->found_error)
 	{
+		ctx->last_exit_code = 2;
 		free_token_list(tokens);
 		return;
 	}
@@ -114,6 +115,7 @@ void	process_single_command(char *command, t_shell_ctx *ctx)
 	cmds = start_parser(tokens, ctx);
 	if (!cmds || cmds->syntax_error)
 	{
+		ctx->last_exit_code = 2;  
 		free_cmd_list(cmds);
 		free_token_list(tokens);
 		return;
@@ -173,30 +175,43 @@ int main(int argc, char **argv, char **envp)
             if (input)
                 ft_strlcpy(input, buffer, bytes_read + 1);
             
-            // If input contains newlines, process each line separately
             if (input && ft_strchr(input, '\n'))
             {
-                char **lines = ft_split(input, '\n');
-                if (lines)
+                char *first_line = input;
+                char *first_newline = ft_strchr(input, '\n');
+                if (first_newline)
                 {
-                    int i = 0;
-                    while (lines[i])
+                    *first_newline = '\0';  // Temporarily null-terminate first line
+                    if (ft_strnstr(first_line, "<<", ft_strlen(first_line)))
                     {
-                        if (lines[i][0] != '\0')  // Skip empty lines
-                        {
-                            // Process each line as a separate command
-                            process_single_command(lines[i], &ctx);
-                        }
-                        i++;
+                        *first_newline = '\n';  // Restore newline
                     }
-                    // Free the split lines
-                    i = 0;
-                    while (lines[i])
-                        free(lines[i++]);
-                    free(lines);
+                    else
+                    {
+                        *first_newline = '\n';
+                        char **lines = ft_split(input, '\n');
+                        if (lines)
+                        {
+                            int i = 0;
+                            while (lines[i])
+                            {
+                                if (lines[i][0] != '\0')  // Skip empty lines
+                                {
+                                    process_single_command(lines[i], &ctx);
+                                    if (ctx.last_exit_code == 2)
+                                        break;
+                                }
+                                i++;
+                            }
+                            i = 0;
+                            while (lines[i])
+                                free(lines[i++]);
+                            free(lines);
+                        }
+                        free(input);
+                        continue; 
+                    }
                 }
-                free(input);
-                continue;  // Skip the normal processing for this iteration
             }
         }
         
@@ -213,11 +228,18 @@ int main(int argc, char **argv, char **envp)
         // Only add to history if input is from terminal
         if (isatty(fileno(stdin)))
             add_history(input);
+        char *processed_input = preprocess_heredoc_input(input, &ctx);
+        if (processed_input)
+        {
+            free(input);
+            input = processed_input;
+        }
+
         // --- LEXER ---
         tokens = start_lexer(input);
         if (!tokens || tokens->found_error)
         {
-            // fprintf(stderr, "Lexing error\n");  // Commented out for tester
+            ctx.last_exit_code = 2;  // Syntax error exit code
             free_token_list(tokens);
             free(input);
             continue ;
@@ -231,6 +253,7 @@ int main(int argc, char **argv, char **envp)
         if (!cmds || cmds->syntax_error)
         {
             // fprintf(stderr, "Parsing error\n");  // Commented out for tester
+            ctx.last_exit_code = 2;  // Syntax error exit code
             free_cmd_list(cmds);
             free_token_list(tokens);
             free(input);

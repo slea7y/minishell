@@ -6,7 +6,7 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 15:46:46 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/26 21:22:12 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/26 22:14:52 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,6 @@ bool	validate_invalid_chars(t_token_list *tokens)
 	}
 	return (true);
 }
-
 bool	validate_syntax(t_token_list *tokens)
 {
 	if (!tokens || !tokens->head)
