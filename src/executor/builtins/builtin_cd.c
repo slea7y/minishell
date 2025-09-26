@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 17:16:52 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/23 17:51:45 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/26 01:55:27 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,48 @@ static int	go_home(char *prev_pwd, t_env_list *env)
 	return (0);
 }
 
-static int	go_dest(t_cmd_node *cmd, char *prev_pwd, t_env_list *env)
+static char	*expand_tilde(char *path, t_env_list *env)
+{
+	char	*home;
+	char	*result;
+
+	if (!path || path[0] != '~')
+		return (ft_strdup(path));
+	
+	// Handle ~ (just tilde)
+	if (path[1] == '\0' || path[1] == '/')
+	{
+		home = get_env_value(env, "HOME");
+		if (!home || home[0] == '\0')
+		{
+			if (home)
+				free(home);
+			return (ft_strdup(path)); // Return original if HOME not set
+		}
+		if (path[1] == '\0')
+		{
+			result = ft_strdup(home);
+			free(home);
+			return (result);
+		}
+		// Handle ~/something
+		result = ft_strjoin(home, &path[1]); // path[1] is '/'
+		free(home);
+		return (result);
+	}
+	
+	// Handle ~username (not implemented in most shells, but we can handle it)
+	// For now, just return the original path
+	return (ft_strdup(path));
+}
+
+static int	go_dest_with_path(char *path, char *prev_pwd, t_env_list *env)
 {
 	char	*curr;
 	int		ret;
 
-	if (cmd->cmd[1][0] == '/' || ft_strcmp(cmd->cmd[1], "..") == 0 || 
-		ft_strcmp(cmd->cmd[1], ".") == 0)
-		curr = ft_strdup(cmd->cmd[1]);
+	if (path[0] == '/' || ft_strcmp(path, "..") == 0 || ft_strcmp(path, ".") == 0)
+		curr = ft_strdup(path);
 	else
 	{
 		curr = getcwd(NULL, 0);
@@ -64,7 +98,7 @@ static int	go_dest(t_cmd_node *cmd, char *prev_pwd, t_env_list *env)
 			free(prev_pwd);
 			return (1);
 		}
-		curr = ft_strjoin(tmp, cmd->cmd[1]);
+		curr = ft_strjoin(tmp, path);
 		free(tmp);
 		if (!curr)
 		{
@@ -79,7 +113,7 @@ static int	go_dest(t_cmd_node *cmd, char *prev_pwd, t_env_list *env)
 		ft_putstr_fd("cd: ", 2);
 		ft_putstr_fd(strerror(errno), 2);
 		ft_putstr_fd(": ", 2);
-		ft_putstr_fd(cmd->cmd[1], 2);
+		ft_putstr_fd(path, 2);
 		ft_putstr_fd("\n", 2);
 		free(curr);
 		free(prev_pwd);
@@ -95,6 +129,7 @@ static int	go_dest(t_cmd_node *cmd, char *prev_pwd, t_env_list *env)
 int	ft_cd(t_cmd_node *cmd, t_env_list *env)
 {
 	char	*prev_pwd;
+	char	*expanded_path;
 
 	prev_pwd = getcwd(NULL, 0);
 	if (!prev_pwd)
@@ -102,21 +137,24 @@ int	ft_cd(t_cmd_node *cmd, t_env_list *env)
 		perror("cd");
 		return (1);
 	}
+	if (!cmd->cmd[1] || (ft_strcmp(cmd->cmd[1], "~") == 0))
+		return (go_home(prev_pwd, env));
+	// Check for too many arguments
 	if (cmd->cmd[2] != NULL)
 	{
 		ft_putstr_fd("cd: too many arguments\n", 2);
 		free(prev_pwd);
 		return (1);
 	}
-	if (!cmd->cmd[1] || (ft_strcmp(cmd->cmd[1], "~") == 0))
-		return (go_home(prev_pwd, env));
 	else if (ft_strcmp(cmd->cmd[1], "-") == 0)
 	{
 		char *oldpwd = get_env_value(env, "OLDPWD");
-		if (oldpwd[0] == '\0')
+		if (!oldpwd || oldpwd[0] == '\0')
 		{
 			ft_putstr_fd("cd: OLDPWD not set\n", 2);
 			free(prev_pwd);
+			if (oldpwd)
+				free(oldpwd);
 			return (1);
 		}
 		ft_putstr_fd(oldpwd, 1);
@@ -138,10 +176,17 @@ int	ft_cd(t_cmd_node *cmd, t_env_list *env)
 		free(prev_pwd);
 		return (0);
 	}
-	else if (ft_strcmp(cmd->cmd[1], ".") == 0)
+	
+	// Handle tilde expansion for other paths
+	expanded_path = expand_tilde(cmd->cmd[1], env);
+	if (!expanded_path)
 	{
 		free(prev_pwd);
-		return (0);
+		return (1);
 	}
-	return (go_dest(cmd, prev_pwd, env));
+	
+	// Now use the expanded path
+	int ret = go_dest_with_path(expanded_path, prev_pwd, env);
+	free(expanded_path);
+	return (ret);
 }

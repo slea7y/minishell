@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 17:15:36 by maja              #+#    #+#             */
-/*   Updated: 2025/09/25 01:51:25 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 01:55:24 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,43 @@ void	free_token_list(t_token_list *tokens)
 	free(tokens);
 }
 
+void	process_single_command(char *command, t_shell_ctx *ctx)
+{
+	t_token_list	*tokens;
+	t_cmd_list		*cmds;
+	int				last_status;
+
+	// --- LEXER ---
+	tokens = start_lexer(command);
+	if (!tokens || tokens->found_error)
+	{
+		free_token_list(tokens);
+		return;
+	}
+
+	// --- SEGMENTATION ---
+	start_segmentation(tokens, ctx);
+
+	// --- PARSER ---
+	cmds = start_parser(tokens, ctx);
+	if (!cmds || cmds->syntax_error)
+	{
+		free_cmd_list(cmds);
+		free_token_list(tokens);
+		return;
+	}
+
+	// --- EXECUTOR ---
+	last_status = start_executor(cmds, ctx);
+	ctx->last_exit_code = last_status;
+
+	// --- CLEANUP ---
+	if (cmds)
+		free_cmd_list(cmds);
+	if (tokens)
+		free_token_list(tokens);
+}
+
 int main(int argc, char **argv, char **envp)
 {
     char        *input;
@@ -135,6 +172,32 @@ int main(int argc, char **argv, char **envp)
             input = malloc(bytes_read + 1);
             if (input)
                 ft_strlcpy(input, buffer, bytes_read + 1);
+            
+            // If input contains newlines, process each line separately
+            if (input && ft_strchr(input, '\n'))
+            {
+                char **lines = ft_split(input, '\n');
+                if (lines)
+                {
+                    int i = 0;
+                    while (lines[i])
+                    {
+                        if (lines[i][0] != '\0')  // Skip empty lines
+                        {
+                            // Process each line as a separate command
+                            process_single_command(lines[i], &ctx);
+                        }
+                        i++;
+                    }
+                    // Free the split lines
+                    i = 0;
+                    while (lines[i])
+                        free(lines[i++]);
+                    free(lines);
+                }
+                free(input);
+                continue;  // Skip the normal processing for this iteration
+            }
         }
         
         if (!input)  // Handle Ctrl+D (EOF)
