@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/27 20:08:44 by majkijew          #+#    #+#             */
-/*   Updated: 2025/09/23 23:17:36 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 15:09:05 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,15 @@ int	ft_pwd(void)
 	return (0);
 }
 
-int	ft_env(t_env_list *envp)
+int	ft_env(t_cmd_node *cmd, t_env_list *envp)
 {
 	t_env_node	*current;
 
 	if (!envp)
 		return (1);
+	(void)cmd;
+	if (cmd->cmd[1])
+		return (0);
 	current = envp->head;
 	while (current)
 	{
@@ -90,8 +93,14 @@ int	ft_exit(t_cmd_node *cmd)
 	exit_code = 0;
 	if (!cmd->cmd[1])
 	{
-		ft_putstr_fd("exit\n", 1);
+		// ft_putstr_fd("exit\n", 1);
 		exit(exit_code);
+	}
+	if (cmd->cmd[2])
+	{
+		// ft_putstr_fd("exit\n", 1);
+		ft_putstr_fd("exit: too many arguments\n", 2);
+		exit(1);
 	}
 	if (!is_numeric(cmd->cmd[1]))
 	{
@@ -99,17 +108,12 @@ int	ft_exit(t_cmd_node *cmd)
 		exit(255);
 	}
 	exit_code = ft_atoi(cmd->cmd[1]);
-	if (cmd->cmd[2])
-	{
-		ft_putstr_fd("exit\n", 1);
-		ft_putstr_fd("exit: too many arguments\n", 2);
-		return (1);
-	}
+
 	// Ensure exit code is in valid range (0-255)
 	exit_code = exit_code % 256;
 	if (exit_code < 0)
 		exit_code = 256 + exit_code;
-	ft_putstr_fd("exit\n", 1);
+	// ft_putstr_fd("exit\n", 1);
 	exit(exit_code);
 }
 
@@ -122,7 +126,7 @@ int	ft_export(t_cmd_node *cmd, t_env_list *env)
 	if (!cmd->cmd[1])
 	{
 		sort_env(env);
-		return (ft_env(env));
+		return (ft_env(cmd, env));
 	}
 	i = 1;
 	while (cmd->cmd[i])

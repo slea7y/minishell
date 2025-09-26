@@ -6,7 +6,7 @@
 /*   By: maja <maja@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:32:19 by maja              #+#    #+#             */
-/*   Updated: 2025/09/24 14:15:44 by maja             ###   ########.fr       */
+/*   Updated: 2025/09/26 02:20:05 by maja             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ static int execute_builtin(t_cmd_node *cmd, t_env_list *env_list)
     else if (ft_strcmp(cmd->cmd[0], "unset") == 0)
         exit_code = ft_unset(cmd, env_list);
     else if (ft_strcmp(cmd->cmd[0], "env") == 0)
-        exit_code = ft_env(env_list);
+        exit_code = ft_env(cmd, env_list);
     else if (ft_strcmp(cmd->cmd[0], "exit") == 0)
         ft_exit(cmd); // exit handles its own exit
 
@@ -464,7 +464,7 @@ int start_executor(t_cmd_list *cmds, t_shell_ctx *ctx)
                 else if (ft_strcmp(current->cmd[0], "unset") == 0)
                     exit_code = ft_unset(current, ctx->env);
                 else if (ft_strcmp(current->cmd[0], "env") == 0)
-                    exit_code = ft_env(ctx->env);
+                    exit_code = ft_env(current , ctx->env);
                 else if (ft_strcmp(current->cmd[0], "exit") == 0)
                     ft_exit(current);
                 exit(exit_code);
