@@ -6,7 +6,7 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/21 19:21:01 by maja              #+#    #+#             */
-/*   Updated: 2025/09/23 16:03:48 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/27 02:05:30 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,10 @@ static t_cmd_node *create_cmd_node(t_token *token)
     if (!node)
         return (NULL);
     node->next = NULL;
-    node->cmd_type = (token->token == TOKEN_BUILTIN) ? BUILTIN : CMD;
+    if (token->token == TOKEN_BUILTIN)
+        node->cmd_type = BUILTIN;
+    else
+        node->cmd_type = CMD;
     node->cmd = malloc(sizeof(char *) * 2);
     if (!node->cmd)
     {
@@ -79,7 +82,7 @@ static int add_argument(t_cmd_node *cmd_node, char *arg)
     return (1);
 }
 
-static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next)
+static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next, t_shell_ctx *ctx)
 {
     t_file_node *file;
     char        *filename;
@@ -103,7 +106,19 @@ static void add_redirection(t_cmd_node *cmd_node, t_token *token, t_token *next)
     // Handle heredoc specially
     if (token->token == TOKEN_HEREDOC)
     {
-        filename = handle_heredoc(next->value);
+        // Check if delimiter is quoted by examining segments
+        // For heredoc: quoted delimiters prevent variable expansion
+        int delimiter_quoted = 0;
+        if (next->segment_list && next->segment_list->head)
+        {
+            t_segment *seg = next->segment_list->head;
+            // Check if the entire token is quoted (single segment with quote type)
+            if (next->segment_list->size == 1 && 
+                (seg->type == SEG_SINGLE_QUOTE || seg->type == SEG_DOUBLE_QUOTE))
+                delimiter_quoted = 1;
+        }
+        
+        filename = handle_heredoc(next->value, delimiter_quoted, ctx);
         if (!filename)
         {
             free(file);
@@ -173,6 +188,21 @@ t_cmd_list *start_parser(t_token_list *tokens, t_shell_ctx *ctx)
                 }
                 add_to_cmd_list(cmd_list, current_cmd);
             }
+            else if (!current_cmd->cmd)  
+            {
+                if (token->token == TOKEN_BUILTIN)
+                    current_cmd->cmd_type = BUILTIN;
+                else
+                    current_cmd->cmd_type = CMD;
+                current_cmd->cmd = malloc(sizeof(char *) * 2);
+                if (!current_cmd->cmd)
+                {
+                    cmd_list->syntax_error = 1;
+                    break;
+                }
+                current_cmd->cmd[0] = ft_strdup(token->value);
+                current_cmd->cmd[1] = NULL;
+            }
             else if (!add_argument(current_cmd, token->value))
             {
                 cmd_list->syntax_error = 1;
@@ -190,12 +220,27 @@ t_cmd_list *start_parser(t_token_list *tokens, t_shell_ctx *ctx)
         }
         else if (token->token >= TOKEN_OUTFILE && token->token <= TOKEN_HEREDOC)
         {
-            if (!current_cmd || !token->next)
+            if (!token->next)
             {
                 cmd_list->syntax_error = 1;
                 break;
             }
-            add_redirection(current_cmd, token, token->next);
+            // If no current command exists, create an empty one for the redirection
+            if (!current_cmd)
+            {
+                current_cmd = malloc(sizeof(t_cmd_node));
+                if (!current_cmd)
+                {
+                    cmd_list->syntax_error = 1;
+                    break;
+                }
+                current_cmd->next = NULL;
+                current_cmd->cmd_type = CMD;  // Will be updated when command is found
+                current_cmd->cmd = NULL;      // Will be set when command token is found
+                current_cmd->files = NULL;
+                add_to_cmd_list(cmd_list, current_cmd);
+            }
+            add_redirection(current_cmd, token, token->next, ctx);
             token = token->next;  // Skip the filename token
         }
         token = token->next;
@@ -212,4 +257,5 @@ t_cmd_list *start_parser(t_token_list *tokens, t_shell_ctx *ctx)
 //     if (!tokens || !tokens->head)
 //         return (NULL);
     
+// }
 // }

@@ -6,7 +6,7 @@
 /*   By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/26 22:42:56 by tdietz-r          #+#    #+#             */
-/*   Updated: 2025/09/23 17:30:55 by tdietz-r         ###   ########.fr       */
+/*   Updated: 2025/09/27 00:50:47 by tdietz-r         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 int	handle_empty_quotes(t_token_list *token_list, int i)
 {
 	(void)token_list;
-	// Skip empty quotes - don't create any token
+//    add_token(token_list, ft_strdup(""), TOKEN_WORD);
 	return (i + 2);
 }
 
@@ -37,18 +37,24 @@ int	handle_redirection(t_token_list *token_list, int i)
 	if (token_list->prompt[i] == '>')
 	{
 		if (token_list->prompt[i + 1] == '>')
+		{
 			return (found_token(token_list, start, i + 2, TOKEN_APPEND), i + 2);
+		}
 		else
-			return (found_token(token_list, start, i + 1, TOKEN_OUTFILE), i
-				+ 1);
+		{
+			return (found_token(token_list, start, i + 1, TOKEN_OUTFILE), i + 1);
+		}
 	}
 	else if (token_list->prompt[i] == '<')
 	{
 		if (token_list->prompt[i + 1] == '<')
-			return (found_token(token_list, start, i + 2, TOKEN_HEREDOC), i
-				+ 2);
+		{
+			return (found_token(token_list, start, i + 2, TOKEN_HEREDOC), i + 2);
+		}
 		else
+		{
 			return (found_token(token_list, start, i + 1, TOKEN_INFILE), i + 1);
+		}
 	}
 	return (i);
 }
