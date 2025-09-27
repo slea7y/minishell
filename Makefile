@@ -6,7 +6,7 @@
 #    By: tdietz-r <tdietz-r@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/21 18:22:52 by maja              #+#    #+#              #
-#    Updated: 2025/09/23 18:11:06 by tdietz-r         ###   ########.fr        #
+#    Updated: 2025/09/27 01:34:06 by tdietz-r         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,9 @@ SRC = ./main.c \
 	src/parser/segmentation/segmentation_handler.c \
 	src/parser/segmentation/expansion.c \
 	src/parser/lexer/init.c \
-	src/parser/heredoc/heredoc.c \
+	src/parser/parsing/variable_expansion.c \
+	src/parser/parsing/line_reader.c \
+	src/parser/parsing/heredoc_processor.c \
 	src/parser/validation/syntax_validation.c \
 	src/executor/builtins/builtin_cd.c \
 	src/executor/builtins/builtin_commands.c \
